@@ -126,11 +126,11 @@ class MADDPG:
         
     def Train(self):
         
-        
+        print('Starting Train')
         for i in range(self.n_epochs):
             for j in range(self.n_episodes):
                 s = self.env.reset()
-                reward = 0
+                reward = []
                 rwd = []
                 ts = 0
                 H=500
@@ -140,7 +140,8 @@ class MADDPG:
                     
                     a = self.policy(s)
                     s_1, r, done = self.env.step(a)
-                    reward += r
+                    
+                    reward.append(r)
                     self.rb.store(s, a, r, s_1, done)
                     
                     if self.rb.ready:
@@ -153,10 +154,10 @@ class MADDPG:
                     #fmt = '*' * int(ts*10/H)
                     #print(f'Epoch {i + 1} Episode {j + 1} |{fmt}| -> {ts}')
                     if done == 1 or ts > H:
-                        print(f'Epoch {i + 1} Episode {j + 1} ended after {ts} timesteps Reward {reward}')
+                        print(f'Epoch {i + 1} Episode {j + 1} ended after {ts} timesteps Reward {np.mean(reward)}')
                         ts=0
                         rwd.append(reward)
-                        reward = 0
+                        reward = []
                         self.noise_reset()
                         break
                     
@@ -169,7 +170,7 @@ class MADDPG:
           
     def _learn(self, sampledBatch):
         s, a, r, s_1, dones = sampledBatch
-        a = a.reshape((3, 64, 2))
+        a = a.reshape((self.n_agents, 64, 2))
         s = tf.convert_to_tensor(s)
         #a = tf.convert_to_tensor(a)
         r = tf.convert_to_tensor(r)

@@ -4,6 +4,8 @@ import rvo2
 from Circle import Circle
 import matplotlib.pyplot as plt
 from typing import Any
+import tensorflow as tf
+from utils import flatten
 
 np.set_printoptions(3)
 class DeepNav():
@@ -170,9 +172,20 @@ class DeepNav():
     
     def setPrefferedVel(self, actions: np.float32) -> None:
         
+        if actions.ndim <= 1:
+            act = tf.linalg.normalize(actions, axis=0)[0]
+            
+            if np.abs(self.getAgentPos(0)[0] + act[0] * self.timestep) > 512 or np.abs(self.getAgentPos(0)[1] + act[1] * self.timestep) > 512:
+                return
+            self.sim.setAgentPrefVelocity(0, tuple(act)) 
+            return
         for i in range(self.n_agents):
-            action = actions[i] * 1/np.linalg.norm(actions[i])
-            self.sim.setAgentPrefVelocity(i, tuple(action))
+            act = tf.linalg.normalize(actions[i], axis=0)[0]
+            
+            
+            if np.abs(self.getAgentPos(i)[0] + act[0] * self.timestep) > 512 or np.abs(self.getAgentPos(i)[1] + act[1] * self.timestep) > 512:
+                return
+            self.sim.setAgentPrefVelocity(i, tuple(act))
             
     def getStateSpec(self):
         return self.__state.shape
@@ -196,14 +209,6 @@ if __name__ == '__main__':
     
     np.set_printoptions(2)
     env = DeepNav(2, 0)
-    print(env.reset())
-    
-    for i in range(100):
-        a = env.sample()
-        env.step(a)
-    
-    print(env.reset())
-    
     
    
    

@@ -3,8 +3,7 @@ import numpy as np
 import time
 from absl import flags
 from absl import app
-from MADQN import MADQN
-from MADQNMix import MADQNMix
+
 from MADDPG import MADDPG
 from Env import DeepNav
 

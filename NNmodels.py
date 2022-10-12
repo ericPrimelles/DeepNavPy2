@@ -11,33 +11,6 @@ def qNetFC(input_shape, output_shape):
     
     # Hidden layers
     lyr1 = layers.Dense(32, activation='relu')(inputs)
-    lyr2 = layers.Dense(64, activation='relu')(lyr1)
-    lyr3 = layers.Dense(32, activation='relu')(lyr2)
-    
-    #Output
-    action = layers.Dense(output_shape, activation='linear')(lyr3)
-    
-    return keras.Model(inputs=inputs, outputs=action)
-
-def DDPGActor(input_shape, output_shape):
-    
-    return qNetFC(input_shape=input_shape, output_shape=output_shape)
-
-def DDPGCritic(input_obs, input_action):
-
-    # State net
-    
-    state_input = layers.Input(input_obs)
-    state_output = layers.Dense(8, activation='relu')(state_input)
-    
-    # Action Net
-    act_inputs = [layers.Input(2) for i in range(input_action)]
-    action_in = layers.Concatenate()(act_inputs)
-    action_outputs = layers.Dense(8, activation='relu')(action_in)
-    
-    # Input
-    inputs = layers.Concatenate()([state_output, action_outputs])
-    lyr1 = layers.Dense(32, activation='relu')(inputs)
     lyr1 = layers.Dropout(0.5)(lyr1)
     lyr1 = layers.BatchNormalization()(lyr1)
     lyr2 = layers.Dense(64, activation='relu')(lyr1)
@@ -46,22 +19,41 @@ def DDPGCritic(input_obs, input_action):
     lyr3 = layers.Dense(32, activation='relu')(lyr2)
     lyr3 = layers.Dropout(0.5)(lyr3)
     lyr3 = layers.BatchNormalization()(lyr3)
-    value = layers.Dense(1, activation='relu')(lyr3)
     
-    return keras.Model(inputs=[state_input, act_inputs], outputs=value)
+    #Output
+    action = layers.Dense(output_shape, activation='linear')(lyr3)
+    action = layers.BatchNormalization()(action)
+    return keras.Model(inputs=inputs, outputs=action)
+
+def DDPGActor(input_shape, output_shape):
+    
+    return qNetFC(input_shape=input_shape, output_shape=output_shape)
+
+def DDPGCritic(input_obs, input_action):
+
+    input_obs = layers.Input(shape=input_obs)
+    input_action = [layers.Input(2) for i in range(input_action)]
+    action = layers.Concatenate()(input_action)
+    inputs = [input_obs, action]
+    cat = layers.Concatenate(axis=-1)(inputs)
+
+    # hidden layer 1
+    h1_ = layers.Dense(300, kernel_initializer=GlorotNormal(), kernel_regularizer=l2(0.01))(cat)
+    h1_b = layers.BatchNormalization()(h1_)
+    h1 = layers.Activation('relu')(h1_b)
+    
+    # hidden_layer 2
+    h2_ = layers.Dense(400, kernel_initializer=GlorotNormal(), kernel_regularizer=l2(0.01))(h1)
+    h2_b = layers.BatchNormalization()(h2_)
+    h2 = layers.Activation('relu')(h2_b)
+    # output layer(actions)
+    output_ = layers.Dense(1, kernel_initializer=GlorotNormal(), kernel_regularizer=l2(0.01))(h2)
+    output_b = layers.BatchNormalization()(output_)
+    output = layers.Activation('relu')(output_b)
+    return keras.Model(inputs,output) 
+
 if __name__ == '__main__':
-    
-    from Env import DeepNav
-    from utils import flatten
-    
-    env = DeepNav(3, 0)
-    ss = env.getActionSpec()[0] * env.getStateSpec()[1]
-    ass = env.n_agents
-    q = DDPGCritic(ss, ass)
-    s = env.reset()
-    s = tf.expand_dims(s, axis=0)
-    s = flatten(s)
-    a = env.sample()
-    a = tf.expand_dims(a, 1)
-    print(q([s, [i for i in a[0:2]], a[2]]))
+    import numpy as np
+    model = qNetFC(3, 2)
+    print(model(np.random.random((1, 3))))    
     
