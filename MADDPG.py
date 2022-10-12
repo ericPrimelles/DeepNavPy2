@@ -59,10 +59,10 @@ class MADDPG:
         
             
         for i in self.agents:
-            a_w = np.array(i['a_n'].variables)
-            q_w = np.array(i['q_n'].variables)
-            a_t_w = np.array(i['target_a_n'].variables)
-            q_t_w = np.array(i['target_q_n'].variables)
+            a_w = np.array(i['a_n'].weights, dtype=object)
+            q_w = np.array(i['q_n'].weights, dtype=object)
+            a_t_w = np.array(i['target_a_n'].weights, dtype=object)
+            q_t_w = np.array(i['target_q_n'].weights, dtype=object)
             
             
             i['target_a_n'].set_weights(a_t_w * self.tau + (1 - self.tau) * a_w)
@@ -189,6 +189,7 @@ class MADDPG:
             with tf.GradientTape() as tape:
             
                 acts = self.chooseAction(s_1, True, True)
+                
                 y = r_agnt + self.gamma * agnt['target_q_n']([flatten(s_1), [acc for acc in acts]])
                 
                 q_value = agnt['q_n']([flatten(s), [acc for acc in a]])
