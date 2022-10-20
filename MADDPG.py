@@ -114,15 +114,16 @@ class MADDPG:
     
     
     def policy(self, s):
-        a = self.chooseAction(s)
+        a = np.squeeze(np.array(self.chooseAction(s)))
         
         x = (self.x_prev
             + 0.15 * (np.ones((self.n_agents, 2)) - self.x_prev) * 1e-2
             + np.full((self.n_agents, 2), 0.2) * np.sqrt(1e-2) * np.random.normal(size=(self.n_agents, 2)))
         
         self.x_prev = x
-        return x
         
+        
+        return x + a    
         
     def Train(self):
         
@@ -222,5 +223,7 @@ if __name__ == '__main__':
     
      env = DeepNav(3, 0)
      p = MADDPG(env)
+     s = env.reset()
+     #s = tf.convert_to_tensor(s)
+     a = p.policy(s)
      
-     p.Train()   
