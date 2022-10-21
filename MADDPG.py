@@ -228,4 +228,5 @@ if __name__ == '__main__':
      env = DeepNav(1, 0)
      p = MADDPG(env)
      p.Train()
+     p.action_space()
      
