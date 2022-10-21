@@ -72,6 +72,8 @@ class DeepNav():
         self.__state = self.getS0()
         self.success = True
         
+        for i in range(self.n_agents):
+            self.sim.setAgentPosition(i, self.positions[i])
         self.__episode_ended = False
         return self.__state
     
@@ -116,7 +118,11 @@ class DeepNav():
     
     def __calculateLocalRwd(self) -> np.float32:
         rwds = np.zeros(self.n_agents)
-        r_goal = r_coll_a = r_coll_obs = r_done = r_cong = 0
+        r_goal = 0
+        r_coll_a = 0 
+        r_coll_obs = 0 
+        r_done = 0
+        r_cong = 0
         
         for i in range(self.n_agents):
             
@@ -142,6 +148,8 @@ class DeepNav():
         
         self.setPrefferedVel(actions=actions)
         self.sim.doStep()
+        
+        
         self.time += self.timestep
         self.__setState()
         rwd = np.zeros((self.n_agents,), dtype=np.float32)
@@ -193,7 +201,7 @@ class DeepNav():
     def getActionSpec(self): return [self.n_agents, 2]
     
     def sample(self):
-        a = np.random.uniform(0, 1, (self.n_agents, 2))
+        a = np.random.uniform(-1, 1, (self.n_agents, 2))
         
         return a
         
@@ -210,6 +218,14 @@ if __name__ == '__main__':
     np.set_printoptions(2)
     env = DeepNav(2, 0)
     
-   
+    env.reset()
+    print(env.getAgentPos(0))
+    for i in range(100):
+        env.step(env.sample())
+    print(env.getAgentPos(0))
+    env.reset()
+    print(env.getAgentPos(0))
+    
+    
    
     

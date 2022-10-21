@@ -131,6 +131,7 @@ class MADDPG:
         for i in range(self.n_epochs):
             for j in range(self.n_episodes):
                 s = self.env.reset()
+                
                 reward = []
                 rwd = []
                 ts = 0
@@ -140,6 +141,8 @@ class MADDPG:
                     
                     
                     a = self.policy(s)
+                    #print(a, s)
+                    #a = self.env.sample()
                     s_1, r, done = self.env.step(a)
                     
                     reward.append(r)
@@ -155,6 +158,7 @@ class MADDPG:
                     #fmt = '*' * int(ts*10/H)
                     #print(f'Epoch {i + 1} Episode {j + 1} |{fmt}| -> {ts}')
                     if done == 1 or ts > H:
+                        
                         print(f'Epoch {i + 1} Episode {j + 1} ended after {ts} timesteps Reward {np.mean(reward)}')
                         ts=0
                         rwd.append(reward)
@@ -221,9 +225,7 @@ class MADDPG:
         
 if __name__ == '__main__':
     
-     env = DeepNav(3, 0)
+     env = DeepNav(1, 0)
      p = MADDPG(env)
-     s = env.reset()
-     #s = tf.convert_to_tensor(s)
-     a = p.policy(s)
+     p.Train()
      
