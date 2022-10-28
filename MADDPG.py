@@ -228,7 +228,7 @@ class MADDPG:
         ts = 0
        
         while 1:
-            report()
+            self.report()
             a = self.chooseAction(s)
             s, r, done = self.env.step(a[0])
             ts += 1
