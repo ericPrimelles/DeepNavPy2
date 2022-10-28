@@ -167,7 +167,9 @@ class DeepNav():
         return self.__state, rwd, int(self.__episode_ended)
     
     
-             
+    def getAgentVelocity(self, i):
+        return self.sim.getAgentVelocity(i)    
+       
      
     def getScenario(self) -> Any:
         if self.scenario == 0:

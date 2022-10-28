@@ -12,13 +12,14 @@ from Env import DeepNav
 from replayBuffer import ReplayBuffer
 from utils import flatten
 from NNmodels import DDPGActor, DDPGCritic
-from joblib import dump
+from joblib import dump, load
+import matplotlib.pyplot as plt
 
 
 class MADDPG:
     
     def __init__(self, env : DeepNav,  n_epochs=1000, n_episodes=10, tau=0.005, 
-                 gamma=0.99, l_r = 1e-5, bf_max_lenght=10000, bf_batch_size=64, path='./models/DDPG/'):
+                 gamma=0.99, l_r = 1e-5, bf_max_lenght=10000, bf_batch_size=64, path='models/DDPG/'):
         
         self.env = env
         self.obs_space = self.env.getStateSpec()
@@ -71,20 +72,20 @@ class MADDPG:
     def save(self):
         for i in self.agents:
             _id = i['id']
-            i['q_n'].save(self.path + f'QNet_{_id}.h5')
-            i['target_q_n'].save(self.path + f'QTargetNet_{_id}.h5')
+            i['q_n'].save_weights(self.path + f'QNet_{_id}.h5')
+            i['target_q_n'].save_weights(self.path + f'QTargetNet_{_id}.h5')
         
-            i['a_n'].save(self.path + f'ANet_{_id}.h5')
-            i['target_a_n'].save(self.path + f'ATargetNet_{_id}.h5')
+            i['a_n'].save_weights(self.path + f'ANet_{_id}.h5')
+            i['target_a_n'].save_weights(self.path + f'ATargetNet_{_id}.h5')
             
     def load(self):
-        for i in self.agents:
-            _id = i['id']
-            i['q_n'] = keras.models.load_model(self.path + f'QNet_{_id}.h5')
-            i['target_q_n'] = keras.models.load_model(self.path + f'QTargetNet_{_id}.h5')
+        for i in range(self.n_agents):
+            _id = self.agents[i]['id']
+            self.agents[i]['q_n'].load_weights(self.path + f'QNet_{_id}.h5')
+            self.agents[i]['target_q_n'].load_weights(self.path + f'QTargetNet_{_id}.h5')
 
-            i['a_n'] = keras.models.load_model(self.path + f'ANet_{_id}.h5')
-            i['target_a_n'] = keras.models.load_model(self.path + f'ATargetNet_{_id}.h5')
+            self.agents[i]['a_n'].load_weights(self.path + f'ANet_{_id}.h5')
+            self.agents[i]['target_a_n'].load_weights(self.path + f'ATargetNet_{_id}.h5')
             
     
     def normalize(self, a):
@@ -128,14 +129,15 @@ class MADDPG:
     def Train(self):
         
         print('Starting Train')
+        rwd = []
         for i in range(self.n_epochs):
             for j in range(self.n_episodes):
                 s = self.env.reset()
                 
                 reward = []
-                rwd = []
+               
                 ts = 0
-                H=500
+                H=100
                 
                 while 1:
                     
@@ -161,7 +163,7 @@ class MADDPG:
                         
                         print(f'Epoch {i + 1} Episode {j + 1} ended after {ts} timesteps Reward {np.mean(reward)}')
                         ts=0
-                        rwd.append(reward)
+                        rwd.append(np.mean(reward))
                         reward = []
                         self.noise_reset()
                         break
@@ -169,7 +171,8 @@ class MADDPG:
                     
                 
             self.save()
-            dump(reward, self.path + f'reward_epcohs_{i}.joblib')
+           
+            dump(rwd, self.path + f'reward_epcohs_{i}.joblib')
                 #print(f'Epoch: {i + 1} / {self.n_epochs} Episode {j + 1} / {self.n_episodes} Reward: {reward / ts}')        
                   
           
@@ -219,14 +222,43 @@ class MADDPG:
             opt.apply_gradients(zip(a_grad, agnt['a_n'].trainable_variables))
             
                        
+    def test(self):
+        self.load()
+        s = self.env.reset()
+        ts = 0
+        f = open(f'{self.path}/report.txt', 'w+')
+        f.write('id,gid,x,y,dir_x,dir_y,radius,time\n')
+        
+        while 1:
+            a = self.chooseAction(s)
+            for i in range(self.n_agents):
+                _id = self.agents[i]['id']
+                f.write(f'{_id},{self.env.getAgentPos(_id)[0]},{self.env.getAgentPos(_id)[1]},{self.env.getAgentVelocity(_id)[0]}, {self.env.getAgentVelocity(_id)[0]}, {self.env.radius}, {self.env.getGlobalTime()}\n')
+            s, r, done = self.env.step(a[0])
+            ts += 1
             
+            if done or ts > 1000:
+                f.close
+                break
+    def plot(self, epoch=None):
+        
+        if epoch == None:
+            epoch = self.n_epochs - 1
+        rwds = load(f'{self.path}/reward_epcohs_{epoch}.joblib')
+        
+        plt.plot(rwds)
+        plt.show()
+        
+     
             
         
         
 if __name__ == '__main__':
     
-     env = DeepNav(1, 0)
+     env = DeepNav(3, 0)
+
+
      p = MADDPG(env)
      p.Train()
-     p.action_space()
-     
+     p.test()
+     p.plot()
