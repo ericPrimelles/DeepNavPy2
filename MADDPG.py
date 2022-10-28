@@ -238,7 +238,7 @@ class MADDPG:
             ts += 1
             
             if done or ts > 1000:
-                f.close
+                f.close()
                 break
     def plot(self, epoch=None):
         
