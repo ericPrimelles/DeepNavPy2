@@ -226,19 +226,15 @@ class MADDPG:
         self.load()
         s = self.env.reset()
         ts = 0
-        f = open(f'{self.path}/report.txt', 'w+')
-        f.write('id,gid,x,y,dir_x,dir_y,radius,time\n')
-        
+       
         while 1:
+            report()
             a = self.chooseAction(s)
-            for i in range(self.n_agents):
-                _id = self.agents[i]['id']
-                f.write(f'{_id},{self.env.getAgentPos(_id)[0]},{self.env.getAgentPos(_id)[1]},{self.env.getAgentVelocity(_id)[0]}, {self.env.getAgentVelocity(_id)[0]}, {self.env.radius}, {self.env.getGlobalTime()}\n')
             s, r, done = self.env.step(a[0])
             ts += 1
             
             if done or ts > 1000:
-                f.close()
+                
                 break
     def plot(self, epoch=None):
         
@@ -248,9 +244,16 @@ class MADDPG:
         
         plt.plot(rwds)
         plt.show()
+    
+    def report(self):   
+        f = open(f'{self.path}/report.txt', 'w+')
+        f.write('id,gid,x,y,dir_x,dir_y,radius,time\n')
         
-     
+        for i in range(self.n_agents):
+                _id = self.agents[i]['id']
+                f.write(f'{_id},{self.env.getAgentPos(_id)[0]},{self.env.getAgentPos(_id)[1]},{self.env.getAgentVelocity(_id)[0]}, {self.env.getAgentVelocity(_id)[0]}, {self.env.radius}, {self.env.getGlobalTime()}\n')
             
+        f.close()   
         
         
 if __name__ == '__main__':
