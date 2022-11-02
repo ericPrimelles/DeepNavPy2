@@ -11,3 +11,5 @@ if __name__ == '__main__':
     x = tf.ones((64, 3, 3))
     
     print(flatten(x))
+    
+    x = tf.random.uniform(100, -2, 2)
