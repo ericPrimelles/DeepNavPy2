@@ -148,8 +148,8 @@ class MADDPG:
                         t_a_state = self.chooseAction(s_1_s, True, True)
                         for i in range(self.n_agents):
                             self.agents[i].update(s_s, a_s, r_s, s_1_s, a_state, t_a_state)
-                            self.updateTarget(self.agents[i].t_critic.weights, self.agents[i].critic.weights, i)
-                            self.updateTarget(self.agents[i].t_actor.weights, self.agents[i].actor.weights, i)
+                            self.updateTarget(self.agents[i].t_critic.variables, self.agents[i].critic.variables, i)
+                            self.updateTarget(self.agents[i].t_actor.variables, self.agents[i].actor.variables, i)
                             
                         
                     s = s_1
