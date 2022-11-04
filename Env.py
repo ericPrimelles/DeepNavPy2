@@ -190,7 +190,7 @@ class DeepNav():
             self.sim.setAgentPrefVelocity(0, tuple(act)) 
             return
         for i in range(self.n_agents):
-            act = tf.linalg.normalize(actions[i], axis=0)[0]
+            act = tf.squeeze(tf.linalg.normalize(actions[i], axis=0)[0])
             
             
             if np.abs(self.getAgentPos(i)[0] + act[0] * self.timestep) > 512 or np.abs(self.getAgentPos(i)[1] + act[1] * self.timestep) > 512:
