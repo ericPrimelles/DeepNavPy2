@@ -56,17 +56,6 @@ def DDPGCritic(input_obs, input_action):
     return keras.Model(inputs=[state_input, act_inputs], outputs=value)
 if __name__ == '__main__':
     
-    from Env import DeepNav
-    from utils import flatten
+    x = DDPGActor(3, 3)
     
-    env = DeepNav(3, 0)
-    ss = env.getActionSpec()[0] * env.getStateSpec()[1]
-    ass = env.n_agents
-    q = DDPGCritic(ss, ass)
-    s = env.reset()
-    s = tf.expand_dims(s, axis=0)
-    s = flatten(s)
-    a = env.sample()
-    a = tf.expand_dims(a, 1)
-    print(q([s, [i for i in a[0:2]], a[2]]))
-    
+    print(type(x.variables))
