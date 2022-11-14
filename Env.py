@@ -132,7 +132,7 @@ class DeepNav():
                 if not j == i and np.hypot(
                     self.sim.getAgentPosition(i)[0] - self.sim.getAgentPosition(j)[0], 
                     self.sim.getAgentPosition(i)[1] - self.sim.getAgentPosition(j)[1]) < 2 * self.radius:
-                   r_coll -= 3
+                   r_coll_a -= 3
                 
             if np.hypot(self.sim.getAgentPosition(i)[0] - self.goals[i][0], self.sim.getAgentPosition(i)[1] - self.goals[i][1]) < self.radius:
                 r_done += 10

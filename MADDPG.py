@@ -209,7 +209,7 @@ class MADDPG:
         
         for i in range(self.n_agents):
                 _id = self.agents[i].agent
-                f.write(f'{_id},{self.env.getAgentPos(_id)[0]},{self.env.getAgentPos(_id)[1]},{self.env.getAgentVelocity(_id)[0]}, {self.env.getAgentVelocity(_id)[0]}, {self.env.radius}, {self.env.getGlobalTime()}\n')
+                f.write(f'{_id},0,{self.env.getAgentPos(_id)[0]},{self.env.getAgentPos(_id)[1]},{self.env.getAgentVelocity(_id)[0]}, {self.env.getAgentVelocity(_id)[0]}, {self.env.radius}, {self.env.getGlobalTime()}\n')
             
            
         
