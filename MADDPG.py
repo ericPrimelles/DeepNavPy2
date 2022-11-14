@@ -220,4 +220,8 @@ if __name__ == '__main__':
 
 
      p = MADDPG(env)
+<<<<<<< HEAD
      p.Train()
+=======
+     p.test()
+>>>>>>> 8f8ffcf29c04c25bf190c2225acb14b5078521ce

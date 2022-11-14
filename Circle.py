@@ -11,7 +11,7 @@ class Circle:
     
     def getAgentPosition(self) -> list:
         agents = np.arange(self.n_agents)
-        self.pos = [(200 * np.cos(i * 2 * np.pi / float(self.n_agents)), 200 * np.sin(i * 2 * np.pi / float(self.n_agents))) for i in agents]
+        self.pos = [(20 * np.cos(i * 2 * np.pi / float(self.n_agents)), 20 * np.sin(i * 2 * np.pi / float(self.n_agents))) for i in agents]
         goals = [(-x, -y) for x, y in self.pos] 
         return self.pos, goals, []
     
