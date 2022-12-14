@@ -44,10 +44,10 @@ class MADDPG:
         self.gamma = gamma
         self.l_r = l_r
         self.tau = tau
-        self.x_prev = np.zeros((self.n_agents, 2))
+        self.epsion = 0.0
+        self.epsilon_increment = 1 / (n_epochs * n_episodes + 10)
         
-    def noise_reset(self):
-        self.x_prev = np.zeros((self.n_agents, 2))
+
     
     @tf.function    
     def updateTarget(self, target_weights, weights, i):
@@ -101,14 +101,10 @@ class MADDPG:
     def policy(self, s):
         a = np.squeeze(np.array(self.chooseAction(s)))
         
-        x = (self.x_prev
-            + 0.15 * (np.ones((self.n_agents, 2)) - self.x_prev) * 1e-2
-            + np.full((self.n_agents, 2), 0.2) * np.sqrt(1e-2) * np.random.normal(size=(self.n_agents, 2)))
-        
-        self.x_prev = x
+        noise = np.random.uniform(-1 + self.epsion, 1 - self.epsion)
         
         
-        return x + a    
+        return a + noise
         
     def Train(self):
         
@@ -163,7 +159,7 @@ class MADDPG:
                         ts=0
                         rwd.append(np.mean(reward))
                         reward = []
-                        self.noise_reset()
+                        self.epsion += self.epsilon_increment
                         break
                     
                     
@@ -220,8 +216,5 @@ if __name__ == '__main__':
 
 
      p = MADDPG(env)
-<<<<<<< HEAD
      p.Train()
-=======
      p.test()
->>>>>>> 8f8ffcf29c04c25bf190c2225acb14b5078521ce
