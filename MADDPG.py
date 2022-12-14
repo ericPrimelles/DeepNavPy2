@@ -165,6 +165,7 @@ class MADDPG:
                     
                 
             self.save()
+            self.test()
            
             dump(rwd, self.path + f'reward_epcohs_{i}.joblib')
                 #print(f'Epoch: {i + 1} / {self.n_epochs} Episode {j + 1} / {self.n_episodes} Reward: {reward / ts}')        
